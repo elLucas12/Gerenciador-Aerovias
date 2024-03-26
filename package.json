@@ -2,17 +2,24 @@
   "type": "module",
   "name": "projetofase1",
   "version": "1.0.0",
-  "description": "",
+  "description": "Software auxiliar de gerenciamento de aerovias",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "Aerovias",
+    "Aeronáutina",
+    "Aviação"
+  ],
+  "author": "Lucas Zunho",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "bycontract": "^2.0.11",
     "n-readlines": "^1.0.1",
     "prompt-sync": "^4.2.0"
+  },
+  "pkg": {
+    "options": ["experimental-modules"]
   }
 }

@@ -1,0 +1,29 @@
+id,origem,destino,tamanho
+5777,Porto Alegre,Passo Fundo,560
+5778,Passo Fundo,Porto Alegre,560
+1191,Porto Alegre,Pelotas,443
+1192,Pelotas,Porto Alegre,443
+6753,Passo Fundo,Pelotas,753
+6743,Pelotas,Passo Fundo,753
+2959,São Paulo,Passo Fundo,1200
+2960,Passo Fundo,São Paulo,1200
+3837,São Paulo,Porto Alegre,1655
+3838,Porto Alegre,São Paulo,1655
+9674,Salvador,Porto Alegre,2982
+9675,Porto Alegre,Salvador,2982
+9700,Salvador,São Paulo,1657
+9701,São Paulo,Salvador,1657
+0670,São Paulo,Manaus,3922
+0671,Manaus,São Paulo,3922
+9282,Porto Alegre,Brasília,1980
+9283,Brasília,Porto Alegre,1980
+9015,São Paulo,Brasília,1010
+9016,Brasília,São Paulo,1010
+2724,Manaus,Brasília,3355
+2725,Brasília,Manaus,3355
+3666,São Paulo,Goiânia,952
+3667,Goiânia,São Paulo,952
+6371,Goiânia,Recife,2346
+6372,Recife,Goiânia,2346
+5899,Goiânia,Brasília,205
+5900,Brasília,Goiânia,205

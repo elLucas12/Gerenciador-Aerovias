@@ -65,4 +65,36 @@ export class ServicoAerovias {
         // Saída com montagem dos objs. pesquisados.
         return aerovias;
     }
+
+    /**
+     * Recupera os dados de uma aerovia a partir de seu identificador numérico. 
+     * 
+     * Formula e retorna um objeto aerovia, conforme especificação. Busca-se na base de
+     * dados CSV um identificador idêntico ao passado de parâmetro e, com a mesma linha de 
+     * dados, constrói-se o objeto Aerovia.
+     * 
+     * @param {String} id Identificador númerico da aerovia dentro da base de dados.
+     * @return Objeto Aerovia conforme identificador.
+     */
+    recuperaId(id) {
+        validate(arguments, ["String"]);
+        id = id.toLowerCase();
+
+        // filedescriptor do CSV.
+        let arq = new nReadlines(this.#csvAerovias);
+        let buff = "";
+        let line = "";
+        let dados = "";
+
+        // Buscando aerovia conforme identificador.
+        arq.next();
+        while (buff = arq.next()) {
+            line = buff.toString('utf8');
+            dados = line.split(',');
+            if (dados[0].toLowerCase() === id) {
+                // Criando um novo objeto Aerovia e retornando-o.
+                return new Aerovia(dados[0], dados[1], dados[2], dados[3]);
+            }
+        }
+    }
 }

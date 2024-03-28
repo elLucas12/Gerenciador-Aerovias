@@ -1,4 +1,4 @@
-import { validate } from 'bycontract';
+import { validate, Exception } from 'bycontract';
 
 /* Piloto -- Classe de representação do agente "piloto".
 Attr:
@@ -12,7 +12,12 @@ export class Piloto {
     #habilitacaoAtiva;
 
     constructor(matricula, nome, habilitacaoAtiva) {
-        validate(arguments, ["String", "String", "Boolean"]);
+        try {
+            validate(arguments, ["String", "String", "Boolean"]);
+        } catch (err) {
+            return null;
+        }
+        
         this.#matricula = matricula;
         this.#nome = nome;
         this.#habilitacaoAtiva = habilitacaoAtiva;

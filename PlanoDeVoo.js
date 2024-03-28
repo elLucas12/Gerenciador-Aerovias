@@ -1,3 +1,5 @@
+import { validate } from 'bycontract';
+
 /**
  * Representa o plano de voo - instânciado no obj ServicoPlanos.
  *
@@ -8,30 +10,54 @@
  */
 export class PlanoDeVoo {
     /** Identificador numérico do plano de voo */
-    #id;
+    id;
 
     /** Matrícula do piloto responsável por conduzir o voo */
-    #matriculaPiloto;
+    matriculaPiloto;
+
+    /** Prefixo da aeronave que será utilizada pelo piloto */
+    pfxAeronave;
 
     /** Identificador numérico da aerovia escolhida */
-    #idAerovia;
+    idAerovia;
 
     /** Data esperada do voo */
-    #data;
+    data;
 
     /** Horário esperado do voo */
-    #horario;
+    horario;
 
     /** Altitude que será utilizada dentro da aerovia */
-    #altitude;
+    altitude;
 
     /** Lista de horários (slots) ocupados pelo voo */
-    #slots = [];
+    slots = [];
 
     /** Armazena se o voo foi cancelado ou não */
     cancelado = false;
 
-    get matriculaPiloto() {
-        return this.#matriculaPiloto;
+    /**
+     * @param {String} id Identificador numérico do plano de voo.
+     * @param {String} matriculaPiloto Matrícula do piloto do plano de voo.
+     * @param {String} pfxAeronave Prefixo da aeronave a ser usada.
+     * @param {String} idAerovia Identificar numérico da aerovia.
+     * @param {String} data Data de realização do plano de voo (dd/mm/aaaa).
+     * @param {String} horario Horário de realização (hh:mm).
+     * @param {Number} altitude Altitude de realização do plano de voo (em un.).
+     * @param {Array<Number>} slots Array com os horários (slots) utilizado pelo voo.
+     * @param {Boolean} cancelado Armazena se o voo é identificado como cancelado.
+     */
+    constructor(id, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, cancelado) {
+        validate(arguments, ['String', 'String', 'String', 'String', 'String', 'String', 'Number', 'Array<String>', 'Boolean']);
+
+        this.id = id;
+        this.matriculaPiloto = matriculaPiloto;
+        this.pfxAeronave = pfxAeronave;
+        this.idAerovia = idAerovia;
+        this.data = data;
+        this.horario = horario;
+        this.altitude = altitude;
+        this.slots = slots;
+        this.cancelado = cancelado;
     }
 }

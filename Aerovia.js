@@ -1,4 +1,4 @@
-import { validate } from "bycontract";
+import { validate, Exception } from "bycontract";
 
 /* Aerovia -- Representação de aerovias utilizadas pelas aeronaves.
  * Attr:
@@ -14,7 +14,12 @@ export class Aerovia {
     #tamanho;
 
     constructor(id, origem, destino, tamanho) {
-        validate(arguments, ["String", "String", "String", "Number"]);
+        try {
+            validate(arguments, ["String", "String", "String", "Number"]);
+        } catch (err) {
+            return null;
+        }
+        
         this.#id = id;
         this.#origem = origem;
         this.#destino = destino;

@@ -40,19 +40,7 @@ export class ServicoPilotos {
             line = buff.toString('utf8');
             dados = line.split(',');
             if (dados[0].toLowerCase() === matricula) {
-                // Digestão dos dados já divididos.
-                dadosPiloto = {
-                    "matricula": dados[0],
-                    "nome": dados[1],
-                    "habilitacaoAtiva": (dados[2] === 'true' ? true : false )
-                };
-
-                // Saída com montagem do obj. Piloto pesquisado.
-                return (new Piloto(
-                    dadosPiloto['matricula'],
-                    dadosPiloto['nome'],
-                    dadosPiloto['habilitacaoAtiva']
-                ));
+                return new Piloto(dados[0], dados[1], (dados[2] === 'true' ? true : false));
             }
         }
     }

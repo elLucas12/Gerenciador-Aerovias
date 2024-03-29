@@ -124,7 +124,10 @@ export class ServicoPlanos {
         for (let line of csvBuffer.split('\n')) {
             let dados = line.split(',');
             if (dados[0].toLowerCase() === id) {
-                return new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), dados[7].split('_'), (dados[8].toLowerCase() === 'true' ? true : false));
+                let slots = dados[7].split('_').map((str) => {
+                    return parseInt(str);
+                });
+                return new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false));
             }
         }
     }
@@ -169,7 +172,10 @@ export class ServicoPlanos {
                     count++;
                     for (let dados of line.split(',')) {
                         try {
-                            objArray.push(new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), dados[7].split('_'), (dados[8].toLowerCase() === 'true' ? true : false)));
+                            let slots = dados[7].split('_').map((str) => {
+                                return parseInt(str);
+                            });
+                            objArray.push(new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false)));
                         } catch (err) {
                             console.error(`Linha ${count} está corrompida!`);
                         }
@@ -239,7 +245,10 @@ export class ServicoPlanos {
                             return undefined;
                         }
                         await writeFile(this.#csvPlanos, newCsvBuffer, 'utf8');
-                        return new PlanoDeVoo(dados[0], dados[1], dados[2], idAerovia, dataLinha, dados[5], altitudeLinha, dados[7].split('_'), (dados[8].toLowerCase() === 'true' ? true : false));
+                        let slots = dados[7].split('_').map((str) => {
+                            return parseInt(str);
+                        });
+                        return new PlanoDeVoo(dados[0], dados[1], dados[2], idAerovia, dataLinha, dados[5], altitudeLinha, slots, (dados[8].toLowerCase() === 'true' ? true : false));
                     }
                 }
             }

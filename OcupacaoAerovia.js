@@ -11,25 +11,32 @@ export class OcupacaoAerovia {
      * 
      * @param {String} idAerovia Identificador numérico da aerovia.
      * @param {Date} data Data de consulta de altitude.
+     * @param {Boolean} retornarLinhas Se o método deve retornar a linha de dados completa.
      * @param {Boolean} repetir Se o array de retorno deve conter valores repetidos ou não.
      * @return Array de altitudes ocupadas na aerovia.
      */
-    async altitudesOcupadas(idAerovia, data, repetir=true) {
+    async altitudesOcupadas(idAerovia, data, retornarLinhas=false, repetir=true) {
         validate(arguments, ['String', 'Date', 'Boolean']);
 
         let linhasAerovia = await this.servicoPlanos.getPlanosAerovia(idAerovia);
         let altitudes = [];
         if (repetir) {
             for (let line of linhasAerovia) {
-                let dataLinha = new Date(Date.parse(line[4]));
+                let dados = line.split(',');
+                let dataLinha = new Date(Date.parse(dados[4]));
                 if (dataLinha.getTime() === data.getTime()) {
-                    altitudes.push(parseFloat(line[6]));
+                    if (retornarLinhas) {
+                        altitudes.push(line);
+                    } else {
+                        altitudes.push(parseFloat(dados[6]));
+                    }
                 }
             }
-        } else {
+        } else { // Não é usado...
             for (let line of linhasAerovia) {
-                let altitudeLinha = parseFloat(line[6]);
-                let dataLinha = new Date(Date.parse(line[4]));
+                let dados = line.split(',');
+                let altitudeLinha = parseFloat(dados[6]);
+                let dataLinha = new Date(Date.parse(dados[4]));
                 if (dataLinha.getTime() === data.getTime()) {
                     let armazena = true;
                     for (let altitude of altitudes) {
@@ -39,7 +46,11 @@ export class OcupacaoAerovia {
                         } 
                     }
                     if (armazena) {
-                        altitudes.push();
+                        if (retornarLinhas) {
+                            altitudes.push(line);
+                        } else {
+                            altitudes.push(altitudeLinha);
+                        }
                     }
                 }
             }
@@ -53,35 +64,41 @@ export class OcupacaoAerovia {
      * @param {String} idAerovia Identificador numérico da aerovia.
      * @param {Date} data Objeto de data a ser pesquisado.
      * @param {Number} altitude Valor da altitude a ser analisada.
+     * @param {Boolean} retornaLinhas Se as linhas devem ser retornadas ao invés de apenas os slots.
      * @return Slots ocupados conforme configurações de busca.
      */
-    async slotsOcupados(idAerovia, data, altitude) {
+    async slotsOcupados(idAerovia, data, altitude, retornaLinhas=false) {
         validate(arguments, ['String', Date, 'Number']);
         idAerovia = idAerovia.toLowerCase();
 
         // Busca e compara os valores linha por linha
+        let slotsOcupados = [];
         let linhasBuffer = await this.servicoPlanos.todos(1);
-        let linhasValidas = [];
         for (let line of linhasBuffer) {
             if (line[0].toLowerCase() === idAerovia) {
                 let dataLinha = new Date(Date.parse(line[4]));
                 if (dataLinha.getTime() === data.getTime()) {
                     if (parseFloat(line[6]) === altitude) {
-                        linhasValidas.push(line);
+                        let slotLinha = (line[7].split('_')).map((str) => {
+                            return parseInt(str);
+                        });
+                        let stop = false;
+                        for (let slot of slotsOcupados) {
+                            if (slot === slotLinha) {
+                                stop = true;
+                                break;
+                            }
+                        }
+                        if (stop) {
+                            continue;
+                        }
+                        if (retornaLinhas) {
+                            slotsOcupados.push(line);
+                        } else {
+                            slotsOcupados.push(slotLinha);
+                        }
                     }
                 }
-            }
-        }
-
-        // Realiza a verificação dos slots
-        let slotsOcupados = [];
-        for (let line of linhasValidas) {
-            let lineSlot = parseFloat(line[7]);
-            for (let slot of slotsOcupados) {
-                if (slot === lineSlot) {
-                    continue;
-                } 
-                slotsOcupados.push(lineSlot);
             }
         }
         return slotsOcupados;

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import promptsync from "prompt-sync";
 const prompt = promptsync({sigint: true});
 
@@ -6,6 +7,7 @@ import { ServicoAerovias } from "./ServicoAerovias";
 import { ServicoPilotos } from "./ServicoPilotos";
 import { ServicoPlanos } from "./ServicoPlanos";
 import { OcupacaoAerovia } from "./OcupacaoAerovia";
+import { PlanoDeVoo } from "./PlanoDeVoo";
 
 export class Menu {
 
@@ -72,7 +74,7 @@ export class Menu {
         }
 
         // Busca e compara os valores
-        let horaConsulta = parseInt(horario[0]);
+        const horaConsulta = parseInt(horario[0]);
         this.#servicoPlanos.todos(1).then((planosDeVoo) => {
             let ocupacaoAltitudes = new Map();
             for (let altitude = 25000; altitude <= 35000; altitude += 1000) {
@@ -87,7 +89,7 @@ export class Menu {
                                 // verifica o horário da consulta
                                 let slotLinha = (line[7].split('_')).map((str) => { return parseInt(str); });
                                 for (let slot of slotLinha) {
-                                    if (slot === parseInt(horario[0])) {
+                                    if (slot === horaConsulta) {
                                         ocupacaoAltitudes.set(altitude, true);
                                     }
                                 }
@@ -107,8 +109,86 @@ export class Menu {
         });
     }
 
+    /**
+     * Submete um plano de voo para aprovação.
+     */
     aprovarPlanoDeVoo() {
+        // Definição dos dados (entrada de usuário)
+        const matriculaPiloto = String(prompt('Matrícula do piloto: '));
+        
+        // Aeronave
+        while (true) {
+            let pfxAeronave = String(prompt('Prefixo da aeronave: '));
+            let aeronave = this.#servicoAeronaves.recupera(pfxAeronave);
+            if (aeronave === null) {
+                console.error(`Os dados da aeronave prefixo '${pfxAeronave}' estão corrompidos na base de dados!\nEspecifique um prefixo diferente.`);
+                continue;
+            } else if (aeronave) {
+                console.error('Prefixo de aeronave não encontrado!');
+            }
+            break;
+        }
+        
+        // Aerovia
+        while (true) {
+            let idAerovia = String(prompt('Número identificador da aerovia: '));
+            let aerovia = this.#servicoAerovias.recuperaId(idAerovia);
+            if (!aerovia) {
+                console.error('ID de aerovia não encontrado!');
+            } 
+            break;
+        }
+            
+        // Data
+        while (true) {
+            let data = String(prompt('Data de execução (dd/mm/aaaa, digite \'p\' para o dia de hoje): '));
+            if (data === 'p') {
+                data = new Date();
+            } else {
+                try {
+                    data = new Date(Date.parse(data));
+                } catch (err) {
+                    console.error(`Falha da criação da data (Obj. Date). Exception=${err}`);
+                    continue;
+                }
+            }
+            break;
+        }
 
+        // Horário
+        while (true) {
+            let horario = String(prompt('Hora a ser consultada (hh:mm, ex "13:56"): '));
+            if ((horario.split(':')).length !== 2) {
+                console.error(`Entrada de hora "${horario}" é inválida! Tente novamente.`);
+                continue;
+            }
+            break;
+        }
+        const altitude = Number(prompt('Altitude de voo: '));
+
+        // Calculando os slots ocupados
+        let slotsCount = Math.ceil(aerovia.tamanho / aeronave.velocidadeCruzeiro);
+        let slots = [];
+        const minutos = parseInt(horario[1]);
+        for (let i = 0; (minutos === 0 ? (i < slotsCount) : (i <= slotsCount)); i++) {
+            slots[i] = parseInt(horario[0]) + i;
+        }
+
+        // Criando e registrando o plano de voo
+        const stringOrgIdHash = (new Date().toUTCString()) + matriculaPiloto + pfxAeronave + idAerovia + data.toUTCString() + horario;
+        const idPlanoDeVoo = createHash('sha256').update(stringOrgIdHash).digest('hex');
+        try {
+            let planoDeVoo = new PlanoDeVoo(idPlanoDeVoo, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, false);
+            this.#servicoPlanos.consiste(planoDeVoo).then((retorno) => {
+                if (retorno) {
+                    console.log(`Plano de voo registrado com sucesso!\n\tIDENTIFICADOR => ${retorno}`);
+                } else {
+                    throw Error('O registro retornou erro.');
+                }
+            });
+        } catch (err) {
+            console.error(`Não foi possível aprovar o plano de voo, tente novamente. Exception: "${err}".`);
+        }
     }
 
     listarPlanos() {

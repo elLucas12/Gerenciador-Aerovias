@@ -31,7 +31,7 @@ export class ServicoPlanos {
      * @param {PlanoDeVoo} plano Obj. PlanoDeVoo com os dados completos.
      * @return Identificador do plano de voo ou, em caso de erro, um null pointer.
      */
-    consiste(plano) {
+    async consiste(plano) {
         validate(arguments, [PlanoDeVoo]);
 
         let erros = [];
@@ -47,7 +47,8 @@ export class ServicoPlanos {
         if (erros.length === 0) plano.cancelado = isCancelado;
 
         // Registra o plano e retorna o identificador.
-        if (this.registrarPlano(plano)) {
+        let registrarPlanoReturn = await this.registrarPlano(plano);
+        if (registrarPlanoReturn) {
             return plano.id;
         }
     }

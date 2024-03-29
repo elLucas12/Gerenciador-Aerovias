@@ -15,15 +15,7 @@ export class Aeronave {
         this.#autonomia = autonomia;
     }
 
-    get prefixo() {
-        return this.#prefixo;
-    }
-
-    get velocidadeCruzeiro() {
-        return this.#velocidadeCruzeiro;
-    }
-
-    get autonomia() {
-        return this.#autonomia;
-    }
+    get prefixo() { return this.#prefixo; }
+    get velocidadeCruzeiro() { return this.#velocidadeCruzeiro; }
+    get autonomia() { return this.#autonomia; }
 }

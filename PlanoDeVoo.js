@@ -1,4 +1,4 @@
-import { validate } from 'bycontract';
+import { validate } from "bycontract";
 
 /**
  * Representa o plano de voo - instânciado no obj ServicoPlanos.
@@ -9,6 +9,7 @@ import { validate } from 'bycontract';
  * no armazenamento inadequado (ids idênticos e outros).
  */
 export class PlanoDeVoo {
+    
     /** Identificador numérico do plano de voo */
     id;
 
@@ -41,14 +42,14 @@ export class PlanoDeVoo {
      * @param {String} matriculaPiloto Matrícula do piloto do plano de voo.
      * @param {String} pfxAeronave Prefixo da aeronave a ser usada.
      * @param {String} idAerovia Identificar numérico da aerovia.
-     * @param {String} data Data de realização do plano de voo (dd/mm/aaaa).
+     * @param {Date} data Data de realização do plano de voo (dd/mm/aaaa).
      * @param {String} horario Horário de realização (hh:mm).
      * @param {Number} altitude Altitude de realização do plano de voo (em un.).
      * @param {Array<Number>} slots Array com os horários (slots) utilizado pelo voo.
      * @param {Boolean} cancelado Armazena se o voo é identificado como cancelado.
      */
     constructor(id, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, cancelado) {
-        validate(arguments, ['String', 'String', 'String', 'String', 'String', 'String', 'Number', 'Array<String>', 'Boolean']);
+        validate(arguments, ['String', 'String', 'String', 'String', Date, 'String', 'Number', 'Array<Number>', 'Boolean']);
 
         this.id = id;
         this.matriculaPiloto = matriculaPiloto;

@@ -8,6 +8,10 @@ import { ServicoPlanos } from "./ServicoPlanos";
 import { OcupacaoAerovia } from "./OcupacaoAerovia";
 import { PlanoDeVoo } from "./PlanoDeVoo";
 
+/**
+ * Classe utilizada para realizar operações relacionadas ao sistema e base de dados
+ * com o acolhimento de opções de menu.
+ */
 export class Menu {
 
     /** Objeto gerenciador de aeronaves */
@@ -236,13 +240,12 @@ export class Menu {
                 planosDeVoo.forEach((planoDeVoo) => {
                     if (planoDeVoo.data.getDate() === data.getDate() && planoDeVoo.data.getMonth() === data.getMonth() && planoDeVoo.data.getFullYear() === data.getFullYear()) {
                         if (!planoDeVoo.cancelado) {
-                            this.#servicoAerovias.recuperaId(planoDeVoo.idAerovia).then((aerovia) => {
-                                if (aerovia) {
-                                    console.log(`ID ${planoDeVoo.id} | orig ${aerovia.destino} | dest ${aerovia.origem}`);
-                                } else {
-                                    console.error('Aerovia não encontrada!');
-                                }
-                            });
+                            let aerovia = this.#servicoAerovias.recuperaId(planoDeVoo.idAerovia);
+                            if (aerovia) {
+                                console.log(`ID ${planoDeVoo.id} | orig ${aerovia.destino} | dest ${aerovia.origem}`);
+                            } else {
+                                console.error('Aerovia não encontrada!');
+                            }
                         }
                     }
                 });
@@ -251,20 +254,21 @@ export class Menu {
             const idPlanoDeVoo = String(prompt('Informe o ID do plano: '));
             if (idPlanoDeVoo.toLowerCase() === 'q') return;
             
-            let planoDeVoo = this.#servicoPlanos.recupera(idPlanoDeVoo);
-            if (planoDeVoo) {
-                console.log(`ID "${planoDeVoo.id}"`);
-                console.log(`\tMatrícula Piloto => ${planoDeVoo.matriculaPiloto}`);
-                console.log(`\tPrefixo Aeronave => ${planoDeVoo.pfxAeronave}`);
-                console.log(`\tID Aerovia \t\t=> ${planoDeVoo.idAerovia}`);
-                console.log(`\tData \t\t\t=> ${planoDeVoo.data.toLocaleDateString()}`);
-                console.log(`\tHorário \t\t\t=> ${planoDeVoo.horario}`);
-                console.log(`\tAltitude \t\t=> ${planoDeVoo.altitude}`);
-                console.log(`\tSlots em uso \t=> ${planoDeVoo.slots}`);
-                console.log(`\tCancelado? \t\t=> ${planoDeVoo.cancelado ? 'Sim' : 'Não'}`);
-            } else {
-                console.error('Plano de voo não encontrado!');
-            }
+            this.#servicoPlanos.recupera(idPlanoDeVoo).then((planoDeVoo) => {
+                if (planoDeVoo) {
+                    console.log(`ID "${planoDeVoo.id}"`);
+                    console.log(`\tMatrícula Piloto => ${planoDeVoo.matriculaPiloto}`);
+                    console.log(`\tPrefixo Aeronave => ${planoDeVoo.pfxAeronave}`);
+                    console.log(`\tID Aerovia \t\t=> ${planoDeVoo.idAerovia}`);
+                    console.log(`\tData \t\t\t=> ${planoDeVoo.data.toLocaleDateString()}`);
+                    console.log(`\tHorário \t\t\t=> ${planoDeVoo.horario}`);
+                    console.log(`\tAltitude \t\t=> ${planoDeVoo.altitude}`);
+                    console.log(`\tSlots em uso \t=> ${planoDeVoo.slots}`);
+                    console.log(`\tCancelado? \t\t=> ${planoDeVoo.cancelado ? 'Sim' : 'Não'}`);
+                } else {
+                    console.error('Plano de voo não encontrado!');
+                }
+            });
         }
     }
 

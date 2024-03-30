@@ -152,7 +152,7 @@ export class OcupacaoAerovia {
         }
 
         // Substituição dos slots.
-        let slotIndex = planoDeVoo.slots.indexOf();
+        let slotIndex = planoDeVoo.slots.indexOf(slot);
         if (slotIndex > -1) {
             planoDeVoo.slots.splice(slotIndex, 1);
             const registrarPlanoReturn = await this.servicoPlanos.registrarPlano(planoDeVoo);
@@ -178,11 +178,11 @@ export class OcupacaoAerovia {
         validate(arguments, ['String', Date, 'Number', 'Number']);
         idAerovia = idAerovia.toLowerCase();
 
-        const csvBuffer = this.servicoPlanos.todos(1);
+        const csvBuffer = await this.servicoPlanos.todos(1);
         for (let line of csvBuffer) {
             let dados = line.split(',');
             if (dados[3].toLowerCase() === idAerovia) {
-                if ((Date(Date.parse(dados[4]))).getTime() === data.getTime()) {
+                if ((new Date(Date.parse(dados[4]))).getTime() === data.getTime()) {
                     if (parseFloat(dados[6]) === altitude) {
                         for (let slotLinha of dados[7].split('_')) {
                             if (parseInt(slotLinha) === slot) {
@@ -194,5 +194,29 @@ export class OcupacaoAerovia {
             }
         }
         return false;
+    }
+
+    /**
+     * Consulta planos de voo pela ID da aerovia e data.
+     * 
+     * @param {String} idAerovia Identificador numérico da aerovia.
+     * @param {Date} data Data de consulta.
+     * @return Array com os planos de voo consultados.
+     */
+    async ocupadosNaData(idAerovia, data) {
+        validate(arguments, ['String', Date]);
+        idAerovia = idAerovia.toLowerCase();
+
+        const csvBuffer = await this.servicoPlanos.todos(0);
+        let ocupacao = [];
+        for (let line of csvBuffer) {
+            let dados = line.split(',');
+            let dataLinha = new Date(Date.parse(dados[4]));
+            let cancelado = (dados[8].toLowerCase() === 'true' ? true : false);
+            if (cancelado && dados[3].toLowerCase() === idAerovia && dataLinha.getDate() === data.getDate() && dataLinha.getMonth() === data.getMonth() && dataLinha.getFullYear() === data.getFullYear()) {
+                ocupacao.push(line);
+            }
+        }
+        return ocupacao;
     }
 }

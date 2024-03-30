@@ -135,6 +135,32 @@ export class ServicoPlanos {
     }
 
     /**
+     * Cancela um determinado plano de voo.
+     * 
+     * @param {String} id Identificador numérico do plano de voo.
+     * @return Verdade se a op. deu certo e False, caso contrário.
+     */
+    async cancelar(id) {
+        validate(arguments, ['String']);
+        let planoDeVoo = this.recupera(id);
+        if (planoDeVoo.cancelado) {
+            return false;
+        }
+        planoDeVoo.cancelado = true;
+        let verifyAux = await this.removePlano(id)
+        if (verifyAux) {
+            verifyAux = await this.registrarPlano(planoDeVoo);
+            if (verifyAux) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Codifica os slots para a escrita na base de dados.
      * 
      * @param {Array<Number>} slots Array de slots do intervalo de voo.

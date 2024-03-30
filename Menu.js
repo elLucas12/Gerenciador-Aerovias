@@ -269,17 +269,59 @@ export class Menu {
     }
 
     /**
+     * Lista a ocupação de uma aerovia em uma determina data.
      * 
+     * Esse método lança para o stdout os identificadores e a origem e o destino da aerovia.
      */
     listarOcupacao() {
-        
+        // Aerovia
+        const idAerovia = String(prompt('ID Aerovia: '));
+        if (idAerovia.toLowerCase() === 'q') return;
+        let aerovia = this.#servicoAerovias.recuperaId(idAerovia);
+        if (aerovia) {
+            // Data
+            while (true) {
+                let data = String(prompt('Data de consulta (dd/mm/aaaa, digite \'p\' para o dia de hoje): '));
+                if (data.toLowerCase() === 'q') return;
+                if (data === 'p') {
+                    data = new Date();
+                } else {
+                    try {
+                        data = new Date(Date.parse(data));
+                    } catch (err) {
+                        console.error(`Falha da criação da data (Obj. Date). Exception=${err}`);
+                        continue;
+                    }
+                }
+                break;
+            }
+
+            // consultando ocupação
+            this.#ocupacaoAerovias.ocupadosNaData(idAerovia, data).then((planosDeVoo) => {
+                let aerovia = this.#servicoAerovias.recuperaId(idAerovia);
+                planosDeVoo.forEach((planoDeVoo) => {
+                    if (!planoDeVoo.cancelado) {
+                        console.log(`ID ${planoDeVoo.id} | orig ${aerovia.origem} | dest ${aerovia.destino}`);
+                    }
+                });
+            });
+        } else {
+            console.error('Aerovia não encontrada!');
+        }
     }
 
+    /**
+     * Cancela um plano de voo passado pelo prompt de usuário.
+     */
     cancelarPlano() {
-
-    }
-
-    sair() {
-
+        let idPlanoDeVoo = String(prompt('ID do plano de voo: '));
+        if (idPlanoDeVoo.toLowerCase() === 'q') return;
+        this.#servicoPlanos.cancelar(idPlanoDeVoo).then((cancelarReturn) => {
+            if (cancelarReturn) {
+                console.log(`O plano de voo "${idPlanoDeVoo}" foi cancelado com sucesso!`);
+            } else {
+                console.error(`Falha ao cancelar o plano de voo "${idPlanoDeVoo}" => Verifique se existem ocorrências na base de dados.`);
+            }
+        });
     }
 }

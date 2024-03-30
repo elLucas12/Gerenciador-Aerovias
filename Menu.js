@@ -114,10 +114,12 @@ export class Menu {
     aprovarPlanoDeVoo() {
         // Definição dos dados (entrada de usuário)
         const matriculaPiloto = String(prompt('Matrícula do piloto: '));
+        if (matriculaPiloto.toLowerCase() === 'q') return;
         
         // Aeronave
         while (true) {
             let pfxAeronave = String(prompt('Prefixo da aeronave: '));
+            if (pfxAeronave.toLowerCase() === 'q') return;
             let aeronave = this.#servicoAeronaves.recupera(pfxAeronave);
             if (aeronave === null) {
                 console.error(`Os dados da aeronave prefixo '${pfxAeronave}' estão corrompidos na base de dados!\nEspecifique um prefixo diferente.`);
@@ -131,6 +133,7 @@ export class Menu {
         // Aerovia
         while (true) {
             let idAerovia = String(prompt('Número identificador da aerovia: '));
+            if (idAerovia.toLowerCase() === 'q') return;
             let aerovia = this.#servicoAerovias.recuperaId(idAerovia);
             if (!aerovia) {
                 console.error('ID de aerovia não encontrado!');
@@ -141,6 +144,7 @@ export class Menu {
         // Data
         while (true) {
             let data = String(prompt('Data de execução (dd/mm/aaaa, digite \'p\' para o dia de hoje): '));
+            if (data.toLowerCase() === 'q') return;
             if (data === 'p') {
                 data = new Date();
             } else {
@@ -157,13 +161,15 @@ export class Menu {
         // Horário
         while (true) {
             let horario = String(prompt('Hora a ser consultada (hh:mm, ex "13:56"): '));
+            if (horario.toLowerCase() === 'q') return;
             if ((horario.split(':')).length !== 2) {
-                console.error(`Entrada de hora "${horario}" é inválida! Tente novamente.`);
+                console.error(`Entrada de hora "${horario}" é inválida! Tente novamente. => DD/MM/AAAA`);
                 continue;
             }
             break;
         }
         const altitude = Number(prompt('Altitude de voo: '));
+        if (altitude.toLowerCase() === 'q') return;
 
         // Calculando os slots ocupados
         let slotsCount = Math.ceil(aerovia.tamanho / aeronave.velocidadeCruzeiro);
@@ -190,7 +196,28 @@ export class Menu {
         }
     }
 
+    /**
+     * Lista um plano de voo a partir de seu ID.
+     * 
+     * Exibe informações de um plano de voo a partir de seu identificador
+     * numérico dentro da base de dados.
+     */
     listarPlanos() {
+        const idPlanoDeVoo = String(prompt('Informe o ID do plano: '));
+        let planoDeVoo = this.#servicoPlanos.recupera(idPlanoDeVoo);
+        if (planoDeVoo) {
+            console.log(`ID "${planoDeVoo.id}"`);
+            console.log(`\tMatrícula Piloto => ${planoDeVoo.matriculaPiloto}`);
+            console.log(`\tPrefixo Aeronave => ${planoDeVoo.pfxAeronave}`);
+            console.log(`\tID Aerovia \t\t=> ${planoDeVoo.idAerovia}`);
+            console.log(`\tData \t\t\t=> ${planoDeVoo.data.toLocaleDateString()}`);
+            console.log(`\tHorário \t\t\t=> ${planoDeVoo.horario}`);
+            console.log(`\tAltitude \t\t=> ${planoDeVoo.altitude}`);
+            console.log(`\tSlots em uso \t=> ${planoDeVoo.slots}`);
+            console.log(`\tCancelado? \t\t=> ${planoDeVoo.cancelado ? 'Sim' : 'Não'}`);
+        } else {
+            console.error('Plano de voo não encontrado!');
+        }
         
     }
 

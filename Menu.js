@@ -204,29 +204,46 @@ export class Menu {
     }
 
     /**
-     * Lista um plano de voo a partir de seu ID.
+     * Lista um plano de voo a partir de seu ID ou de uma determinada data.
      * 
      * Exibe informações de um plano de voo a partir de seu identificador
      * numérico dentro da base de dados ou os planos de voo em determinada data. 
      * 
      * @param {Boolean} aPartirDaData Se a listagem deve ocorrer a partir da data.
-     * @param {Date} data Data a ser pesquisada, se for o caso.
      * 
      * Se o parametro for false, será consultado apenas um plano de voo - isso
      * ocorrerá a partir do ID que será passado pelo usuário.
      */
-    listarPlanos(aPartirDaData=false, data=null) {
+    listarPlanos(aPartirDaData=false) {
         if (aPartirDaData) {
+            while (true) {
+                let data = String(prompt('Data de consulta (dd/mm/aaaa, digite \'p\' para o dia de hoje): '));
+                if (data.toLowerCase() === 'q') return;
+                if (data === 'p') {
+                    data = new Date();
+                } else {
+                    try {
+                        data = new Date(Date.parse(data));
+                    } catch (err) {
+                        console.error(`Falha da criação da data (Obj. Date). Exception=${err}`);
+                        continue;
+                    }
+                }
+                break;
+            }
+
             this.#servicoPlanos.todos(0).then((planosDeVoo) => {
                 planosDeVoo.forEach((planoDeVoo) => {
                     if (planoDeVoo.data.getDate() === data.getDate() && planoDeVoo.data.getMonth() === data.getMonth() && planoDeVoo.data.getFullYear() === data.getFullYear()) {
-                        this.#servicoAerovias.recuperaId(planoDeVoo.idAerovia).then((aerovia) => {
-                            if (aerovia) {
-                                console.log(`ID ${planoDeVoo.id} | orig ${aerovia.destino} | dest ${aerovia.origem}`);
-                            } else {
-                                console.error('Aerovia não encontrada!');
-                            }
-                        });
+                        if (!planoDeVoo.cancelado) {
+                            this.#servicoAerovias.recuperaId(planoDeVoo.idAerovia).then((aerovia) => {
+                                if (aerovia) {
+                                    console.log(`ID ${planoDeVoo.id} | orig ${aerovia.destino} | dest ${aerovia.origem}`);
+                                } else {
+                                    console.error('Aerovia não encontrada!');
+                                }
+                            });
+                        }
                     }
                 });
             });
@@ -251,6 +268,9 @@ export class Menu {
         }
     }
 
+    /**
+     * 
+     */
     listarOcupacao() {
         
     }

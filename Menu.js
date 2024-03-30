@@ -33,7 +33,9 @@ export class Menu {
      */
     listarAerovias() {
         let origem = String(prompt('Qual a origem? '));
+        if (origem.toLowerCase() === 'q') return;
         let destino = String(prompt('Qual o destino? '));
+        if (destino.toLowerCase() === 'q') return;
         let aerovias = this.#servicoAerovias.recupera(origem, destino);
         for (let aerovia of aerovias) {
             console.log(`\t${aerovia.id} | ${aerovia.origem} | ${aerovia.destino}`);
@@ -47,8 +49,11 @@ export class Menu {
      */
     listarAltitudesLivres() {
         let idAerovia = String(prompt('Qual o ID da aerovia? '));
+        if (idAerovia.toLowerCase() === 'q') return;
+
         while (true) {
             let horario = String(prompt('Hora a ser consultada (hh:mm, ex "13:56"): '));
+            if (horario.toLowerCase() === 'q') return;
             horario = horario.split(':');
             if (horario.length !== 2) {
                 console.error(`Entrada de hora "${horario}" é inválida! Tente novamente.`);
@@ -59,6 +64,7 @@ export class Menu {
         }
         while (true) {
             let data = String(prompt('Qual o dia? (dd/mm/aaaa - digite \'p\' para o dia de hoje) '));
+            if (data.toLowerCase() === 'q') return;
             if (data === 'p') {
                 data = new Date();
             } else {
@@ -112,6 +118,7 @@ export class Menu {
      * Submete um plano de voo para aprovação.
      */
     aprovarPlanoDeVoo() {
+        // console.log(`Submissão de Plano de Voo (entre com \'q\' para voltar)`);
         // Definição dos dados (entrada de usuário)
         const matriculaPiloto = String(prompt('Matrícula do piloto: '));
         if (matriculaPiloto.toLowerCase() === 'q') return;
@@ -200,29 +207,52 @@ export class Menu {
      * Lista um plano de voo a partir de seu ID.
      * 
      * Exibe informações de um plano de voo a partir de seu identificador
-     * numérico dentro da base de dados.
+     * numérico dentro da base de dados ou os planos de voo em determinada data. 
+     * 
+     * @param {Boolean} aPartirDaData Se a listagem deve ocorrer a partir da data.
+     * @param {Date} data Data a ser pesquisada, se for o caso.
+     * 
+     * Se o parametro for false, será consultado apenas um plano de voo - isso
+     * ocorrerá a partir do ID que será passado pelo usuário.
      */
-    listarPlanos() {
-        const idPlanoDeVoo = String(prompt('Informe o ID do plano: '));
-        let planoDeVoo = this.#servicoPlanos.recupera(idPlanoDeVoo);
-        if (planoDeVoo) {
-            console.log(`ID "${planoDeVoo.id}"`);
-            console.log(`\tMatrícula Piloto => ${planoDeVoo.matriculaPiloto}`);
-            console.log(`\tPrefixo Aeronave => ${planoDeVoo.pfxAeronave}`);
-            console.log(`\tID Aerovia \t\t=> ${planoDeVoo.idAerovia}`);
-            console.log(`\tData \t\t\t=> ${planoDeVoo.data.toLocaleDateString()}`);
-            console.log(`\tHorário \t\t\t=> ${planoDeVoo.horario}`);
-            console.log(`\tAltitude \t\t=> ${planoDeVoo.altitude}`);
-            console.log(`\tSlots em uso \t=> ${planoDeVoo.slots}`);
-            console.log(`\tCancelado? \t\t=> ${planoDeVoo.cancelado ? 'Sim' : 'Não'}`);
+    listarPlanos(aPartirDaData=false, data=null) {
+        if (aPartirDaData) {
+            this.#servicoPlanos.todos(0).then((planosDeVoo) => {
+                planosDeVoo.forEach((planoDeVoo) => {
+                    if (planoDeVoo.data.getDate() === data.getDate() && planoDeVoo.data.getMonth() === data.getMonth() && planoDeVoo.data.getFullYear() === data.getFullYear()) {
+                        this.#servicoAerovias.recuperaId(planoDeVoo.idAerovia).then((aerovia) => {
+                            if (aerovia) {
+                                console.log(`ID ${planoDeVoo.id} | orig ${aerovia.destino} | dest ${aerovia.origem}`);
+                            } else {
+                                console.error('Aerovia não encontrada!');
+                            }
+                        });
+                    }
+                });
+            });
         } else {
-            console.error('Plano de voo não encontrado!');
+            const idPlanoDeVoo = String(prompt('Informe o ID do plano: '));
+            if (idPlanoDeVoo.toLowerCase() === 'q') return;
+            
+            let planoDeVoo = this.#servicoPlanos.recupera(idPlanoDeVoo);
+            if (planoDeVoo) {
+                console.log(`ID "${planoDeVoo.id}"`);
+                console.log(`\tMatrícula Piloto => ${planoDeVoo.matriculaPiloto}`);
+                console.log(`\tPrefixo Aeronave => ${planoDeVoo.pfxAeronave}`);
+                console.log(`\tID Aerovia \t\t=> ${planoDeVoo.idAerovia}`);
+                console.log(`\tData \t\t\t=> ${planoDeVoo.data.toLocaleDateString()}`);
+                console.log(`\tHorário \t\t\t=> ${planoDeVoo.horario}`);
+                console.log(`\tAltitude \t\t=> ${planoDeVoo.altitude}`);
+                console.log(`\tSlots em uso \t=> ${planoDeVoo.slots}`);
+                console.log(`\tCancelado? \t\t=> ${planoDeVoo.cancelado ? 'Sim' : 'Não'}`);
+            } else {
+                console.error('Plano de voo não encontrado!');
+            }
         }
-        
     }
 
     listarOcupacao() {
-
+        
     }
 
     cancelarPlano() {

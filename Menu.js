@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import promptsync from "prompt-sync";
 const prompt = promptsync({sigint: true});
 
@@ -175,8 +174,8 @@ export class Menu {
         }
 
         // Criando e registrando o plano de voo
-        const stringOrgIdHash = (new Date().toUTCString()) + matriculaPiloto + pfxAeronave + idAerovia + data.toUTCString() + horario;
-        const idPlanoDeVoo = createHash('sha256').update(stringOrgIdHash).digest('hex');
+        const stringOrgIdHash = matriculaPiloto + pfxAeronave + idAerovia + data.toUTCString() + horario;
+        const idPlanoDeVoo = this.#servicoPlanos.generateId(stringOrgIdHash);
         try {
             let planoDeVoo = new PlanoDeVoo(idPlanoDeVoo, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, false);
             this.#servicoPlanos.consiste(planoDeVoo).then((retorno) => {
@@ -192,7 +191,7 @@ export class Menu {
     }
 
     listarPlanos() {
-
+        
     }
 
     listarOcupacao() {

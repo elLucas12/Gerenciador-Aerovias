@@ -1,6 +1,7 @@
 import { validate } from 'bycontract';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { createHash } from "node:crypto";
 
 import { PlanoDeVoo } from './PlanoDeVoo.js';
 import { ServicoPilotos } from './ServicoPilotos.js';
@@ -253,6 +254,26 @@ export class ServicoPlanos {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Gera um ID único para planos de voo.
+     * 
+     * @param {String} seed String a ser utilizada como seed do hash.
+     * @return Retorna um id válido de 10 bytes.
+     */
+    async generateId(seed) {
+        while (true) {
+            const hash = createHash('sha256').update(seed + (new Date().toUTCString())).digest('hex');
+            let hashSub = hash.substring(54);
+    
+            // Verificando a existencia do id
+            let idObj = this.recupera(hashSub);
+            if (idObj) {
+                continue;
+            }
+            return hashSub;
         }
     }
 }

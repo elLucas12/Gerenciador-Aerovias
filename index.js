@@ -22,8 +22,7 @@ const menuStr = "Menu:\n\
 (5) Consultar planos por data\n\
 (6) Listar ocupação de aerovia por data\n\
 (7) Cancelar plano de voo\n\
-(0) Sair\n\
-: ";
+(0) Sair";
 
 /** Objeto para execução das opções de menu */
 let menu = new Menu();
@@ -33,7 +32,8 @@ let running = true;
 
 console.log('Sistema de Controle de Tráfego Aéreo (SCTA) - v1.0.0\nCopyright (c) BSD-3-clause 2024');
 while (running) {
-    let uinput = Number(prompt(menuStr));
+    console.log(menuStr);
+    let uinput = Number(prompt(': '));
     switch(uinput) {
         case 0:
             running = false;
@@ -42,22 +42,22 @@ while (running) {
             menu.listarAerovias();
             break;
         case 2:
-            menu.listarAltitudesLivres();
+            await menu.listarAltitudesLivres();
             break;
         case 3:
-            menu.aprovarPlanoDeVoo();
+            await menu.aprovarPlanoDeVoo();
             break;
         case 4:
-            menu.listarPlanos();
+            await menu.listarPlanos();
             break;
         case 5:
-            menu.listarPlanos(true);
+            await menu.listarPlanos(true);
             break;
         case 6:
-            menu.listarOcupacao();
+            await menu.listarOcupacao();
             break;
         case 7:
-            menu.cancelarPlano();
+            await menu.cancelarPlano();
             break;
         default:
             console.error('Opção inválida!');

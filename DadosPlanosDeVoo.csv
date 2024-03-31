@@ -1,1 +1,3 @@
 id, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, cancelado
+dc8fa07b67,55p6fvvw,apal,5778,1731121200000,12:00,27000,12,false
+24bef39486,fwmfh9p2,bxoo,9675,1735700400000,12:30,29000,12_13_14_15_16,true

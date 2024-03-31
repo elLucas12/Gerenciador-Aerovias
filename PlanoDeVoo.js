@@ -49,7 +49,7 @@ export class PlanoDeVoo {
      * @param {Boolean} cancelado Armazena se o voo é identificado como cancelado.
      */
     constructor(id, matriculaPiloto, pfxAeronave, idAerovia, data, horario, altitude, slots, cancelado) {
-        validate(arguments, ['String', 'String', 'String', 'String', Date, 'String', 'Number', 'Array<Number>', 'Boolean']);
+        validate(arguments, ['String', 'String', 'String', 'String', Date, 'String', 'Number', 'Array.<Number>', 'Boolean']);
 
         this.id = id;
         this.matriculaPiloto = matriculaPiloto;

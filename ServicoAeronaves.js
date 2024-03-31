@@ -91,6 +91,7 @@ export class ServicoAeronaves {
      * @return Objeto do tipo Aeronave, conforme a especificação dos dados.
      */
     #constroiAeronavePorArray(dados) {
+        validate(arguments, ['Array.<String>']);
         if (dados[3] === 'true') {
             return new AeronaveParticular(dados[0], parseFloat(dados[1]), parseFloat(dados[2]), dados[4]);
         } else if (dados[5] === 'true' && dados[7] === 'true') {

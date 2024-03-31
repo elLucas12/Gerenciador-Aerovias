@@ -93,7 +93,14 @@ export class ServicoAerovias {
             dados = line.split(',');
             if (dados[0].toLowerCase() === id) {
                 // Criando um novo objeto Aerovia e retornando-o.
-                return new Aerovia(dados[0], dados[1], dados[2], parseFloat(dados[3]));
+                let aerovia;
+                try {
+                    aerovia = new Aerovia(dados[0], dados[1], dados[2], parseFloat(dados[3]));
+                } catch (err) {
+                    console.error('Construção do obj Aerovia deu erro!');
+                    return null;
+                }
+                return aerovia;
             }
         }
     }

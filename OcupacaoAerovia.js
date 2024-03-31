@@ -1,5 +1,5 @@
 import { validate } from "bycontract";
-import { ServicoPlanos } from "./ServicoPlanos";
+import { ServicoPlanos } from "./ServicoPlanos.js";
 
 export class OcupacaoAerovia {
 
@@ -207,14 +207,11 @@ export class OcupacaoAerovia {
         validate(arguments, ['String', Date]);
         idAerovia = idAerovia.toLowerCase();
 
-        const csvBuffer = await this.servicoPlanos.todos(0);
+        const planosDeVoo = await this.servicoPlanos.todos(0);
         let ocupacao = [];
-        for (let line of csvBuffer) {
-            let dados = line.split(',');
-            let dataLinha = new Date(Date.parse(dados[4]));
-            let cancelado = (dados[8].toLowerCase() === 'true' ? true : false);
-            if (cancelado && dados[3].toLowerCase() === idAerovia && dataLinha.getDate() === data.getDate() && dataLinha.getMonth() === data.getMonth() && dataLinha.getFullYear() === data.getFullYear()) {
-                ocupacao.push(line);
+        for (let planoDeVoo of planosDeVoo) {
+            if (!planoDeVoo.cancelado && planoDeVoo.idAerovia.toLowerCase() === idAerovia && planoDeVoo.data.getTime() == data.getTime()) {
+                ocupacao.push(planoDeVoo);
             }
         }
         return ocupacao;

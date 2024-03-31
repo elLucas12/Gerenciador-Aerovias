@@ -64,7 +64,7 @@ export class ServicoPlanos {
      * @return {Array<String>} Array de erros com a adição dos erros de verificação dos objetos.
      */
     #tagsErros(piloto, aerovia, aeronave, erros) {
-        validate(arguments, ['*', '*', '*', 'Array<String>']);
+        validate(arguments, ['*', '*', '*', 'Array.<String>']);
 
         if (!typeof piloto === 'undefined') {
             erros.push('Piloto não encontrado no CSV.');
@@ -101,13 +101,14 @@ export class ServicoPlanos {
 
         // Construindo buffer e armazenando na base de dados CSV.
         let binSlots = this.#binSlots(plano.slots);
-        let buffer = `${plano.id},${plano.matriculaPiloto},${plano.pfxAeronave},${plano.idAerovia},${plano.data},${plano.horario},${plano.altitude},${binSlots},${plano.cancelado}`;
+        console.log(`Não compilado => ${plano.slots}; Compilado => ${binSlots}`);
+        let buffer = `\n${plano.id},${plano.matriculaPiloto},${plano.pfxAeronave},${plano.idAerovia},${plano.data.getTime()},${plano.horario},${plano.altitude},${binSlots},${plano.cancelado}`;
 
         let appendFileReturn = await appendFile(this.#csvPlanos, buffer);
         if (typeof appendFileReturn === 'undefined') {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -129,7 +130,13 @@ export class ServicoPlanos {
                 let slots = dados[7].split('_').map((str) => {
                     return parseInt(str);
                 });
-                return new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false));
+                try {
+                    let planoDeVoo = new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], new Date(Number(dados[4])), dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false));
+                    return planoDeVoo;
+                } catch (err) {
+                    console.error(`Erro na consulta de plano de voo. Exception => "${err}"`);
+                    return null;
+                }
             }
         }
     }
@@ -142,12 +149,12 @@ export class ServicoPlanos {
      */
     async cancelar(id) {
         validate(arguments, ['String']);
-        let planoDeVoo = this.recupera(id);
-        if (planoDeVoo.cancelado) {
+        let planoDeVoo = await this.recupera(id);
+        if (!planoDeVoo || planoDeVoo.cancelado) {
             return false;
         }
         planoDeVoo.cancelado = true;
-        let verifyAux = await this.removePlano(id)
+        let verifyAux = await this.removePlanoId(id);
         if (verifyAux) {
             verifyAux = await this.registrarPlano(planoDeVoo);
             if (verifyAux) {
@@ -167,11 +174,11 @@ export class ServicoPlanos {
      * @return Slots em forma de uso computacional ou em forma de texto para armazenamento.
      */
     #binSlots(slots) {
-        validate(arguments, ['Array<Number>', 'Boolean']);
+        validate(arguments, ['Array.<Number>']);
         let lineSlots = ''
-        for (let slot of slots) {
-            lineSlots += '_';
-            lineSlots += slot.toString();
+        for (let idx = 0; idx < slots.length; idx++) {
+            if (!(idx === 0)) lineSlots += '_';
+            lineSlots += slots[idx].toString();
         }
         return lineSlots;
     }
@@ -191,22 +198,22 @@ export class ServicoPlanos {
     async todos(mode) {
         validate(arguments, ['Number']);
         
-        const csvBuffer = await readFile(this.#csvPlanos, { encoding: 'utf8' });
+        let csvBuffer = await readFile(this.#csvPlanos, { encoding: 'utf8' });
         switch(mode) {
             case 0:
                 let objArray = [];
                 let count = 0;
                 for (let line of csvBuffer.split('\n')) {
                     count++;
-                    for (let dados of line.split(',')) {
-                        try {
-                            let slots = dados[7].split('_').map((str) => {
-                                return parseInt(str);
-                            });
-                            objArray.push(new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], dados[4], dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false)));
-                        } catch (err) {
-                            console.error(`Linha ${count} está corrompida!`);
-                        }
+                    if (count === 1) continue;
+                    let dados = line.split(',');
+                    try {
+                        let slots = (dados[7].split('_')).map((str) => {
+                            return parseInt(str);
+                        });
+                        objArray.push(new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], new Date(Number(dados[4])), dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false)));
+                    } catch (err) {
+                        console.error(`Linha ${count} está corrompida! e:${err}`);
                     }
                 }
                 return objArray;
@@ -242,6 +249,37 @@ export class ServicoPlanos {
             }
         }
         return linhasAerovia;
+    }
+
+    /**
+     * Busca, remove e retorna um plano de voo da base de dados a partir de seu ID.
+     * 
+     * @param {String} idPlano Identificador único do plano de voo.
+     * @return Objeto removido pela consulta.
+     */
+    async removePlanoId(idPlano) {
+        validate(arguments, ['String']);
+        idPlano = idPlano.toLowerCase();
+
+        // Busca e verifica os valores na base de dados.
+        const csvBuffer = await readFile(this.#csvPlanos, { encoding: 'utf8' });
+        let newCsvBuffer = csvBuffer.split('\n');
+        for (let line of newCsvBuffer) {
+            let dados = line.split(',');
+            if (dados[0].toLowerCase() === idPlano) {
+                let lineIndex = newCsvBuffer.indexOf(line);
+                if (lineIndex > -1) {
+                    newCsvBuffer.splice(lineIndex, 1);
+                } else {
+                    return undefined;
+                }
+                await writeFile(this.#csvPlanos, newCsvBuffer.join('\n'), 'utf8');
+                let slots = dados[7].split('_').map((str) => {
+                    return parseInt(str);
+                });
+                return new PlanoDeVoo(dados[0], dados[1], dados[2], dados[3], new Date(Date.parse(dados[4])), dados[5], parseFloat(dados[6]), slots, (dados[8].toLowerCase() === 'true' ? true : false));
+            }
+        }
     }
 
     /**
@@ -295,7 +333,7 @@ export class ServicoPlanos {
             let hashSub = hash.substring(54);
     
             // Verificando a existencia do id
-            let idObj = this.recupera(hashSub);
+            let idObj = await this.recupera(hashSub);
             if (idObj) {
                 continue;
             }

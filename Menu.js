@@ -7,6 +7,7 @@ import { ServicoPilotos } from "./ServicoPilotos.js";
 import { ServicoPlanos } from "./ServicoPlanos.js";
 import { OcupacaoAerovia } from "./OcupacaoAerovia.js";
 import { PlanoDeVoo } from "./PlanoDeVoo.js";
+import { validate } from "bycontract";
 
 /**
  * Classe utilizada para realizar operações relacionadas ao sistema e base de dados
@@ -112,17 +113,21 @@ export class Menu {
                 for (let altitude = 25000; altitude < 35000; altitude += 1000) {
                     ocupacaoAltitudes.set(altitude, false);
                     for (let planoDeVoo of planosDeVoo) {
-                        // Verifica ID da aerovia
-                        if (planoDeVoo.idAerovia.toLowerCase() === idAerovia) {
-                            // Verifica a data de consulta
-                            if (planoDeVoo.data.getTime() === data.getTime()) {
-                                // Verifica o valor de altitude
-                                if (planoDeVoo.altitude === altitude) {
-                                    // verifica o horário da consulta
-                                    for (let slot of planoDeVoo.slots) {
-                                        if (slot === horaConsulta) {
-                                            ocupacaoAltitudes.set(altitude, true);
+                        // Verifica se está cancelado
+                        if (!planoDeVoo.cancelado) {
+                            // Verifica ID da aerovia
+                            if (planoDeVoo.idAerovia.toLowerCase() === idAerovia) {
+                                // Verifica a data de consulta
+                                if (planoDeVoo.data.getTime() === data.getTime()) {
+                                    // Verifica o valor de altitude
+                                    if (planoDeVoo.altitude === altitude) {
+                                        // verifica o horário da consulta
+                                        for (let slot of planoDeVoo.slots) {
+                                            if (slot === horaConsulta) {
+                                                ocupacaoAltitudes.set(altitude, true);
+                                            }
                                         }
+                                        if (ocupacaoAltitudes.get(altitude)) break;
                                     }
                                 }
                             }
@@ -145,10 +150,18 @@ export class Menu {
      * Submete um plano de voo para aprovação.
      */
     async aprovarPlanoDeVoo() {
-        // console.log(`Submissão de Plano de Voo (entre com \'q\' para voltar)`);
         // Definição dos dados (entrada de usuário)
-        const matriculaPiloto = String(prompt('Matrícula do piloto: '));
-        if (matriculaPiloto.toLowerCase() === 'q') return;
+        let matriculaPiloto;
+        while (true) {
+            matriculaPiloto = String(prompt('Matrícula do piloto: '));
+            if (matriculaPiloto.toLowerCase() === 'q') return;
+            let piloto = this.#servicoPilotos.recupera(matriculaPiloto);
+            if (!piloto) {
+                console.error('Piloto não encontrado!');
+                continue;
+            }
+            break;
+        }
         
         // Aeronave
         let pfxAeronave;
@@ -229,17 +242,38 @@ export class Menu {
             }
         }
         
-        // Altitude
-        let altitude = String(prompt('Altitude de voo: '));
-        if (altitude.toLowerCase() === 'q') return;
-        altitude = parseInt(altitude);
+        // Altitude & Slots
+        let altitude;
+        let slotsCount;
+        let slots;
+        while (true) {
+            slotsCount = 0;
+            slots = [];
 
-        // Calculando os slots ocupados
-        let slotsCount = Math.ceil(aerovia.tamanho / aeronave.velocidadeCruzeiro);
-        let slots = [];
-        
-        for (let i = 0; (minutos === 0 ? (i < slotsCount) : (i <= slotsCount)); i++) {
-            slots[i] = horas + i;
+            // uinput altitude
+            altitude = String(prompt('Altitude de voo: '));
+            if (altitude.toLowerCase() === 'q') return;
+            altitude = parseInt(altitude);
+
+            // Calculando os slots
+            slotsCount = Math.ceil(aerovia.tamanho / aeronave.velocidadeCruzeiro);
+            for (let i = 0; (minutos === 0 ? (i < slotsCount) : (i <= slotsCount)); i++) {
+                slots[i] = horas + i;
+            }
+
+            // Verificando a ocupação de altitude conforme aerovia
+            let isOcupado = false;
+            for (let slot of slots) {
+                if (this.#ocupacaoAerovias.isOcupado(idAerovia, data, altitude, slot)) {
+                    isOcupado = true;
+                    break;
+                }
+            }
+            if (isOcupado) {
+                console.log('Essa altitude está ocupada!');
+                continue;
+            }
+            break;
         }
 
         // Criando e registrando o plano de voo
@@ -271,6 +305,7 @@ export class Menu {
      * ocorrerá a partir do ID que será passado pelo usuário.
      */
     async listarPlanos(aPartirDaData=false) {
+        validate(arguments, ['Boolean']);
         if (aPartirDaData) {
             let data;
             while (true) {
@@ -372,7 +407,6 @@ export class Menu {
 
             // consultando ocupação
             await this.#ocupacaoAerovias.ocupadosNaData(idAerovia, data).then((planosDeVoo) => {
-                let aerovia = this.#servicoAerovias.recuperaId(idAerovia);
                 planosDeVoo.forEach((planoDeVoo) => {
                     console.log(`\tID ${planoDeVoo.id} | orig ${aerovia.origem} | dest ${aerovia.destino}`);
                 });

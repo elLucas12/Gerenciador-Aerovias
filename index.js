@@ -31,6 +31,7 @@ let menu = new Menu();
 let running = true;
 
 console.log('Sistema de Controle de Tráfego Aéreo (SCTA) - v1.0.0\nCopyright (c) BSD-3-clause 2024');
+console.log(`(Para cancelar qualquer opção de menu entre com \'q\' e Enter)`);
 while (running) {
     console.log(menuStr);
     let uinput = Number(prompt(': '));

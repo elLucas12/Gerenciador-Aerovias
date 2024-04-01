@@ -68,7 +68,7 @@ export class OcupacaoAerovia {
      * @return Slots ocupados conforme configurações de busca.
      */
     async slotsOcupados(idAerovia, data, altitude, retornaLinhas=false) {
-        validate(arguments, ['String', Date, 'Number']);
+        validate(arguments, ['String', Date, 'Number', 'Boolean']);
         idAerovia = idAerovia.toLowerCase();
 
         // Busca e compara os valores linha por linha
@@ -178,17 +178,12 @@ export class OcupacaoAerovia {
         validate(arguments, ['String', Date, 'Number', 'Number']);
         idAerovia = idAerovia.toLowerCase();
 
-        const csvBuffer = await this.servicoPlanos.todos(1);
-        for (let line of csvBuffer) {
-            let dados = line.split(',');
-            if (dados[3].toLowerCase() === idAerovia) {
-                if ((new Date(Date.parse(dados[4]))).getTime() === data.getTime()) {
-                    if (parseFloat(dados[6]) === altitude) {
-                        for (let slotLinha of dados[7].split('_')) {
-                            if (parseInt(slotLinha) === slot) {
-                                return true;
-                            }
-                        }
+        const planosDeVoo = await this.servicoPlanos.todos(0);
+        for (let planoDeVoo of planosDeVoo) {
+            if (planoDeVoo.idAerovia.toLowerCase() === idAerovia && planoDeVoo.data.getTime() === data.getTime() && planoDeVoo.altitude === altitude && !planoDeVoo.cancelado) {
+                for (let slotAux of planoDeVoo.slots) {
+                    if (slotAux === slot) {
+                        return true;
                     }
                 }
             }

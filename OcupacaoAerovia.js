@@ -1,6 +1,12 @@
 import { validate } from "bycontract";
 import { ServicoPlanos } from "./ServicoPlanos.js";
 
+/**
+ * Permite a consulta e validação da população das aerovias do sistema.
+ * 
+ * Os métodos se limitam ao obj ServicoPlanos para diminuir o acesso à base de dados CSV,
+ * diminuíndo o tempo de processamento e retorno dos dados.
+ */
 export class OcupacaoAerovia {
 
     /** Objeto administrador de dados dos Planos de Voo */

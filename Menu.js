@@ -266,8 +266,8 @@ export class Menu {
             // Verificando a ocupação de altitude conforme aerovia
             let isOcupado = false;
             for (let slot of slots) {
-                if (this.#ocupacaoAerovias.isOcupado(idAerovia, data, altitude, slot)) {
-                    isOcupado = true;
+                isOcupado = await this.#ocupacaoAerovias.isOcupado(idAerovia, data, altitude, slot);
+                if (isOcupado) {
                     break;
                 }
             }

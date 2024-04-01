@@ -6,6 +6,10 @@
  * e de Pilotos, não são controlados por esse programa, sua administração deve ocorrer por 
  * scripts auxiliares (como mostra o programa index antigo 'index.old.js') ou manualmente no CSV.
  * 
+ * Para executar os testes relacionados a esse script, execute `npm test` ou as suas alternativas
+ * no arquivo de configuração. Os testes são realizados através do framework jest - definido na seção
+ * devDependencies, pelo qual é possível realizar a instalação como dependência.
+ * 
  * Copyright (c) 2024 Lucas Zunho (BSD-3-clause).
  */
 

@@ -5,7 +5,9 @@
   "description": "Software auxiliar de gerenciamento de aerovias",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest --coverage"
   },
   "keywords": [
     "Aerovias",
@@ -20,6 +22,11 @@
     "prompt-sync": "^4.2.0"
   },
   "pkg": {
-    "options": ["experimental-modules"]
+    "options": [
+      "experimental-modules"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

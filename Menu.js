@@ -70,7 +70,9 @@ export class Menu {
             horario = String(prompt('Hora a ser consultada (hh:mm, ex "13:56"): '));
             if (horario.toLowerCase() === 'q') return;
             horario = horario.split(':');
-            if (horario.length !== 2) {
+            let hora = parseInt(horario[0]);
+            let min = parseInt(horario[1]);
+            if (horario.length !== 2 || hora >= 24 || hora < 0 || min >= 60 || min < 0) {
                 console.error(`Entrada de hora "${horario}" é inválida! Tente novamente.`);
                 continue;
             } else {
@@ -305,7 +307,7 @@ export class Menu {
      * ocorrerá a partir do ID que será passado pelo usuário.
      */
     async listarPlanos(aPartirDaData=false) {
-        validate(arguments, ['Boolean']);
+        validate(arguments, ['Boolean=']);
         if (aPartirDaData) {
             let data;
             while (true) {
